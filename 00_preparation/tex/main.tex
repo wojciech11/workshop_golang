@@ -1,0 +1,183 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{enumerate}
+\usepackage{listings}
+\usepackage{fancyvrb}
+\usepackage{kotex}
+\usepackage{polski}
+\usepackage[document]{ragged2e} % keep all left
+\usepackage[english]{babel}
+
+\usepackage{minted} % yaml syntax highlighting
+
+\newenvironment{markdown}%
+    {\VerbatimEnvironment\begin{VerbatimOut}{tmp.markdown}}%
+    {\end{VerbatimOut}%
+        \immediate\write18{pandoc tmp.markdown -t latex -o tmp.tex}%
+        \input{tmp.tex}}
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\newcommand*{\email}[1]{\href{mailto:#1}{\nolinkurl{#1}} } 
+
+\title{Golang Programming Workshop\\Preparation\\{ \small \href{https://creativecommons.org/licenses/by/4.0/}{CC BY 4.0} }  }
+\author{Wojciech Barczynski}
+\date{}
+
+
+\begin{document}
+\selectlanguage{english}
+
+\begin{titlepage}
+\maketitle
+\end{titlepage}
+
+\tableofcontents
+\pagebreak
+\section{Prerequisites}
+
+Expected background knowledge and skills for the workshop:
+
+\begin{itemize}%
+\item Have 1-year hands-on experience in other programming language.%
+\item Know how to work with the Command Line Interface in Linux or {\small OSX}.
+\end{itemize}%
+
+\section{Your workstation}
+
+\begin{itemize}%
+\item Linux or {\small OSX} recommended;%
+\item Basic: \begin{itemize}%
+    \item Golang,
+    \item Git.
+    \end{itemize}%
+\item An IDE or code editor to work with Golang, e.g.: \begin{itemize}%
+    \item vscode,
+    \item Jetbrains Goland.
+    \end{itemize}%
+\item Docker;
+\item {\small SQL} and no{\small SQL} exercise (recommended with Docker):
+\begin{itemize}%
+    \item Postgres,
+    \item MongoDB.
+\end{itemize}%
+\end{itemize}%
+
+\section{How to prepare your workstation}
+
+\subsection{Ubuntu Linux}
+
+We recommend Ubuntu, one of the LTSes - \href{https://wiki.ubuntu.com/Releases}{wiki.ubuntu.com/Releases}.
+\bigskip
+
+1. Install Golang, following the instructions from \href{https://github.com/golang/go/wiki/Ubuntu}{github.com/golang/go/wiki/Ubuntu}:
+
+\begin{minted}{bash}
+sudo add-apt-repository ppa:longsleep/golang-backports
+sudo apt-get update
+sudo apt-get install golang-go
+\end{minted}
+
+\begin{minted}{bash}
+# check whether it works.
+go version
+\end{minted}
+\bigskip
+
+2. Install vscode (\href{https://code.visualstudio.com/}{code.visualstudio.com/}) or Goland (\href{https://www.jetbrains.com/go/}{jetbrains.com/go/}):
+
+\begin{minted}{bash}
+# vscode with snap
+# https://code.visualstudio.com/docs/setup/linux
+sudo snap install --classic code
+\end{minted}
+
+For Jetbrain Goland follow the standalone installation:\\
+\href{https://www.jetbrains.com/help/go/installation-guide.html#c2dfc2}{www.jetbrains.com/help/go/installation-guide.html}.
+
+\smallskip
+You will find on \href{https://github.com/golang/go/wiki/IDEsAndTextEditorPlugins}{github.com/golang/go/wiki/IDEsAndTextEditorPlugins} information on to configure your favorite editor to develop in Golang.
+
+\bigskip
+3. Install Git:
+
+\begin{minted}{bash}
+sudo apt-get update
+sudo apt-get install git
+\end{minted}
+
+\bigskip
+4. Install Docker after \href{https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository}{docs.docker.com/engine/install/ubuntu}, copy and paste to your terminal:
+
+\begin{minted}[breaklines]{bash}
+# install necessary packages
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl gnupg
+
+# Add Docker’s official GPG key:
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+    | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+# Setting up the repository:
+echo \
+ "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+ "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" |\
+ sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+\end{minted}
+
+Install \mintinline{bash}{docker-ce}:
+
+\begin{minted}{bash}
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli
+\end{minted}
+
+Check whether it works:
+
+\begin{minted}{bash}
+sudo docker run hello-world
+\end{minted}
+
+\subsection{MacOS}
+
+1. Install \emph{homebrew}, a package manager for MacOS, follow the instructions from the official website - \href{https://brew.sh/}{brew.sh/}.
+\bigskip
+
+2. With \emph{homebrew}, install Golang is easy:
+
+\begin{minted}{bash}
+brew install golang
+\end{minted}
+
+\begin{minted}{bash}
+go version
+\end{minted}
+
+\bigskip
+3. Choose your {\small IDE} - \emph{vscode} (recommended for this workshop) or \emph{Goland}:
+
+\begin{minted}{bash}
+# for vscode
+brew install --cask visual-studio-code
+\end{minted}
+
+\begin{minted}{bash}
+# for goland community edition
+brew install --cask goland
+\end{minted}
+
+\bigskip
+3. To install Docker, go to \href{https://docs.docker.com/desktop/install/mac-install/}{docs.docker.com/desktop/install/mac-install/}.
+
+\section{References}
+
+\begin{itemize}%
+\item The Missing Semester of Your CS Education: \href{https://missing.csail.mit.edu/}{missing.csail.mit.edu};
+\item Quick start with \emph{Goland}: \href{https://www.jetbrains.com/help/idea/quick-start-guide-goland.html}{jetbrains.com/help/idea/quick-start-guide-goland.html};
+\item Quick start with VSCode: \\ \href{https://learn.microsoft.com/en-us/azure/developer/go/configure-visual-studio-code}{learn.microsoft.com/en-us/azure/developer/go/configure-visual-studio-code}.
+\end{itemize}%
+
+\end{document}

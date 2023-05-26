@@ -1,0 +1,9 @@
+tmp/*
+**/_minted-*/
+*/tmp.markdown
+*/tmp.tex
+**/*.aux
+**/*.log
+**/*.out
+**/*.toc
+**/tmp/*

@@ -1,0 +1,1065 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{enumerate}
+\usepackage{listings}
+\usepackage{fancyvrb}
+\usepackage{kotex}
+\usepackage{polski}
+\usepackage[document]{ragged2e} % keep all left
+\usepackage[english]{babel}
+
+\usepackage{minted} % yaml syntax highlighting
+
+\newenvironment{markdown}%
+    {\VerbatimEnvironment\begin{VerbatimOut}{tmp.markdown}}%
+    {\end{VerbatimOut}%
+        \immediate\write18{pandoc tmp.markdown -t latex -o tmp.tex}%
+        \input{tmp.tex}}
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\newcommand*{\email}[1]{\href{mailto:#1}{\nolinkurl{#1}} } 
+
+\title{Golang Programming Workshop\\Basics 2\\{ \small \href{https://creativecommons.org/licenses/by/4.0/}{CC BY 4.0} }  }
+\author{Wojciech Barczynski}
+\date{}
+%\\(wbarczynski.pro@gmail.com)
+
+
+\begin{document}
+\selectlanguage{english}
+
+\begin{titlepage}
+\maketitle
+\end{titlepage}
+
+\tableofcontents
+\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Golang project layout}
+
+\begin{itemize}%
+\item No rigid project structure;
+\item The best practice is to keep things simple;
+\item As project grows, you can move to more sophisticated directory structure.
+\end{itemize}%
+
+Iteration 1:
+
+\begin{verbatim}
+|- _your_package_1
+|- _your_package_2
+|- _your_package_3
+|- vendor/
+|- main.go
+|- go.mod
+|- go.sum
+\- README.md
+\end{verbatim}
+
+Iteration 2:
+
+\begin{verbatim}
+|- cmd/
+|  \- _your_app
+|       \- main.go
+|- _your_package_1
+|- _your_package_2
+|- vendor/
+|- go.mod
+|- go.sum
+\- README.md
+\end{verbatim}
+
+Iteration 3:
+
+\begin{verbatim}
+|- cmd/
+|  \- _your_app
+|       \- main.go
+|- _your_package_1
+|- _your_package_2
+|- vendor/ # go mod download
+|- tools/  # tools
+|- go.mod
+|- go.sum
+\- README.md
+\end{verbatim}
+
+Iteration 4 - \verb|pkg| might be a good idea if you have other technologies in your repository:
+
+\begin{verbatim}
+|- cmd/
+|  \- _your_app
+|       \- main.go
+|- _your_package_1
+|- _your_package_2
+|- pkg/
+|- vendor/ # go mod download
+|- tools/  # tools
+|- go.mod
+|- go.sum
+\- README.md
+\end{verbatim}
+
+Good source of inspiration:
+
+\begin{itemize}%
+\item \href{https://peter.bourgon.org/go-in-production/}{peter.bourgon.org/go-in-production/} (\href{https://www.youtube.com/watch?v=PTE4VJIdHPg}{video});
+\item \href{https://github.com/traefik/traefik}{github.com/traefik/traefik}.
+\end{itemize}%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Naming conventions in Golang}
+
+\begin{itemize}%
+\item camelCase: variables, function names, and files (\href{https://go.dev/doc/effective\_go\#mixed-caps}{go.dev/doc/effective\_go\#mixed-caps});
+\item Acronyms should be all capitals, as in ServeHTTP and IDProcessor;
+\item package names: \begin{itemize}%
+\item \href{https://go.dev/doc/effective\_go\#names}{go.dev/doc/effective\_go\#names},
+\item \href{https://go.dev/blog/package-names}{go.dev/blog/package-names},
+\item following the business domain.
+\end{itemize}%
+\end{itemize}%
+
+All the best practises for the naming variables in other languages apply to Golang:
+
+\begin{itemize}%
+\item Consistent (easy to guess),
+\item Short (easy to type),
+\item Accurate.
+\item The greater the distance between a name's declaration and its uses, 
+the longer the name should be.
+\end{itemize}%
+
+All the best practises for naming functions in other languages apply to Golang as well:
+
+\begin{itemize}%
+\item one function one thing,
+\item good name,
+\item not to long.
+\end{itemize}%
+
+\bigskip
+\textbf{Notice:} common mistake is to make Golang look like your favorite programming language.
+
+%%%%%%%%%%%%%%%%%%
+\section{Errors}
+Let's define our own error and see how they work. We will use the standard libraries for handling errors.
+
+Notice \verb|error| interface is:
+
+\begin{minted}[frame=single]{go}
+type error interface {
+  Error() string
+}
+\end{minted}
+
+\begin{minted}[frame=single]{go}
+package main
+
+import "fmt"
+
+func Divide(a, b int) (int, error) {
+    if b == 0 {
+        return 0, fmt.Errorf("can't divide '%d' by zero", a)
+    }
+    return a / b, nil
+}
+\end{minted}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Convention}
+
+\begin{itemize}%
+\item No \verb|try|/\verb|catch| in Golang,
+\item Idiomatic way: \begin{minted}[frame=single]{go}
+if err != nil {
+	// often wrapped
+	// not shown below
+	return err
+}
+
+// or return
+if err != nil {
+	// logging the error
+	return
+}
+\end{minted}
+\item Returned as the last value: \begin{minted}[frame=single]{go}
+func Divide(a, b int) (int, error) {
+}
+\end{minted}
+\item error messages are usually written in lower-case and don’t end in punctuation.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Sentimental Errors}
+
+An example of such errors are: \mintinline{go}{sql.ErrNoRows} and \mintinline{go}{io.EOF}, they are declared as:
+
+\begin{minted}[frame=single]{go}
+package sql
+
+var errNoRows = errors.New("sql: no Rows available")
+\end{minted}
+
+The advantage? It is simple to handle:
+
+\begin{minted}[frame=single]{go}
+err := db.QueryRow("SELECT * FROM users WHERE id = ?", userID)
+
+// the old way:
+if err == sql.ErrNoRows {
+  // an error we know
+}  else if err != nil { 
+  // another error
+}
+\end{minted}
+
+or
+
+\begin{minted}[frame=single]{go}
+err := db.QueryRow("SELECT * FROM users WHERE id = ?", userID)
+
+if err != nil {
+	switch {
+	// preferable
+	case errors.Is(err, sql.ErrNoRows):
+		// ...
+	default:
+		// ...
+	}
+}
+\end{minted}
+
+Advantage? Simple. Disadvantage? \begin{itemize}%
+\item Not too much info,
+\item they become a part of your package {\small API}.
+\end{itemize}%
+
+\bigskip
+
+Please change the implementation of the Employee Mgmt application using \emph{Package errors}\footnote{\href{https://godoc.org/github.com/pkg/errors}{https://godoc.org/github.com/pkg/errors}}: \begin{itemize}%
+\item return an error when the employee cannot take hollidays.
+\end{itemize}%
+
+
+You will find the application in the github repo:\\
+\href{https://github.com/wojciech11/workshop\_golang/tree/master/02\_basics/examples/employee\_mgmt}{02\_basics/examples/employee\_mgmt}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Custom Error Types}
+
+Use the following example of a custom error type to change the errors implementation in the \verb|Employee| application:
+
+\begin{minted}[frame=single]{go}
+type ParsingError struct {
+    IncorrectValue string
+}
+
+func (e *ParsingError) Error() string {
+    return fmt.Sprintf("Cannot parse %v: internal error",
+      e.IncorrectValue)
+}
+\end{minted}
+
+if we use our custom error code, our code will get more complicated:
+
+\begin{minted}[frame=single]{go}
+// old way
+if err := Foo(); err != nil {
+    switch e := err.(type) {
+    case *ParsingError:
+        // handling the error
+    default:
+        log.Println(e)
+    }
+}
+\end{minted}
+
+\begin{minted}[frame=single]{go}
+// new way
+err := Foo()
+
+if errors.As(&ParsingError{}) {
+	// handling the error
+}
+\end{minted}
+
+Advantages? Disadvantages?
+\bigskip
+
+Notice that you can customzie both \mintinline{go}{Is} and \mintinline{go}{As}.
+\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Opaque errors}
+
+The idea:
+
+\begin{itemize}
+\item return your own errors,
+\item provide functions to determine what has happended.
+\end{itemize}
+
+An example for Dave Cheney blog \footnote{\href{https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully}{https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully}}:
+
+\begin{minted}[frame=single]{go}
+type temporary interface {
+        Temporary() bool
+}
+ 
+// IsTemporary returns true if err is temporary.
+func IsTemporary(err error) bool {
+        te, ok := err.(temporary)
+        return ok && te.Temporary()
+}
+\end{minted}
+
+\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Wrapping and Unwrapping errors}
+
+You should use this approach to errors as your default along with the custom type errors. Notice \verb|%w| (stands for wrapping) and \mintinline{go}{errors.Is}  in the code below:
+
+\inputminted[frame=single]{go}{examples/wrap_errors/main.go}
+
+From \href{https://go.dev/blog/go1.13-errors}{go.dev/blog/go1.13-errors}: \emph{when adding additional context to an error, either with fmt.Errorf or by implementing a custom type, you need to decide whether the new error should wrap the original. There is no single answer to this question; it depends on the context in which the new error is created. Wrap an error to expose it to callers. Do not wrap an error when doing so would expose implementation details}
+
+\bigskip
+
+Your task: implement this error handling in your Employee managemetn application.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Stack trackes}
+
+With help of the package errors\footnote{\href{https://godoc.org/github.com/pkg/errors}{https://godoc.org/github.com/pkg/errors}}, we can provide support for the stacktraces and handling error causes. Let's see how to implement, a stacktrace support for our application: 
+
+\begin{minted}[frame=single]{go}
+package main
+
+import (
+  "fmt"
+  "github.com/pkg/errors"
+)
+
+
+type stackTracer interface {
+  StackTrace() errors.StackTrace
+}
+
+var errProcess = errors.New("boom")
+
+func processData() error {
+  return errProcess
+}
+
+func main() {
+  err := processData()
+  wrappedErr := errors.Wrap(err, "processing failed")
+  fmt.Printf("%v", wrappedErr)
+
+  if err, ok := wrappedErr.(stackTracer); ok {
+    fmt.Printf("%+v", err.StackTrace())
+  }
+}
+\end{minted}
+
+Unwrapping:
+
+\begin{minted}[frame=single]{go}
+package main
+
+import (
+  "fmt"
+  "net"
+
+  "github.com/pkg/errors"
+)
+
+type myErrProcess error
+
+var errProcess myErrProcess = errors.New("boom")
+
+func processData() error {
+  return errProcess
+}
+
+func main() {
+  errData := processData()
+  wrappedErr := errors.Wrap(errData, "processing failed")
+
+  _, ok := errors.Cause(wrappedErr).(net.Error)
+  if ok {
+    fmt.Printf("net.Error")
+  }
+
+  errP, ok := errors.Cause(wrappedErr).(myErrProcess)
+  if ok {
+    fmt.Printf(errP.Error())
+  }
+}
+\end{minted}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Defer, Panic, and Recover}
+
+There is a way to recover from the panic, when we use \mintinline{go}{defer}, \mintinline{go}{panic}, and \mintinline{go}{recover}. We are not going to cover it in the introduction course.
+
+If you cannot wait, check \href{https://blog.golang.org/defer-panic-and-recover}{a defer-panic-and-recover blog post on golang.org} and \href{https://github.com/golang/go/wiki/PanicAndRecover}{the Golang wiki panic and recover article}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Error best practices}
+
+\begin{itemize}
+\item Handle errors once,
+\item Error, keep on the left,
+\item Notice: standard errors do not come with stacktraces,
+\item Read \begin{itemize}
+\item An article from 8thlight \footnote{\href{https://8thlight.com/blog/kyle-krull/2018/08/13/exploring-error-handling-patterns-in-go.html}{https://8thlight.com/blog/kyle-krull/2018/08/13/exploring-error-handling-patterns-in-go.html}},
+\item Blog post on go erros - \href{https://go.dev/blog/go1.13-errors}{go.dev/blog/go1.13-errors}.
+\end{itemize}
+\end{itemize}
+
+\bigskip
+
+Libraries:
+
+\begin{itemize}
+\item \href{https://github.com/hashicorp/go-multierror}{github.com/hashicorp/go-multierror}
+\item \href{https://github.com/go-errors/errors}{github.com/go-errors/errors}
+\item \href{https://github.com/pkg/errors}{github.com/pkg/errors}
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%
+\pagebreak
+\section{Tests}
+
+Create a simple test in a file -- \mintinline{bash}{main_test.go}. To run tests: \mintinline{bash}{go test .}.
+
+\begin{minted}[frame=single]{go}
+package main
+
+import (
+  "fmt"
+)
+
+func add(a int, b int) int {
+  return a + b
+}
+
+func main() {
+  fmt.Println(add(10,20))
+}
+
+func TestAdd(t *testing.T) {
+  if add(10,25) != 20 {
+    t.Fatal("Boom!")
+  }
+}
+\end{minted}
+
+\pagebreak
+\subsection{Table-driven tests}
+
+1. Create a project \verb|workshop-test|:
+
+main.go:
+
+\begin{minted}[frame=single]{go}
+package main
+
+import (
+  "errors"
+  "fmt"
+)
+
+var errUnknownOperation = errors.New("Unknown operation")
+
+func Calculate(op string, a int, b int) (int, error) {
+  switch op {
+  case "+":
+    return a + b, nil
+  }
+  return 0, errUnknownOperation
+}
+
+func main() {
+  r, _ := Calculate("+", 1, 2)
+  fmt.Println(r)
+}
+\end{minted}
+
+\verb|main_test.go|:
+
+\begin{minted}[frame=single]{go}
+package main
+
+import (
+  "testing"
+)
+
+func TestCalculate(t *testing.T) {
+  testCases := map[string]struct {
+    op       string
+    a        int
+    b        int
+    expected int
+  }{
+    "simple add": {"+", 1, 3, 4},
+  }
+
+  for name, v := range testCases {
+    t.Logf("test: %s", name)
+    r, err := Calculate(v.op, v.a, v.b)
+    if err != nil {
+      t.Fatalf("%v", err)
+    }
+    if r != v.expected {
+      t.Fatalf("Failed!")
+    }
+  }
+}
+\end{minted}
+
+Run the tests:
+
+\begin{minted}{bash}
+go test .
+\end{minted}
+
+Notice: you can add \verb|-race| to turn on the race detector.
+
+Notice: \verb|go clean -testcache| to clean the cache.
+
+\bigskip
+2. Add, first the test, support for division.
+
+\subsection{Test with real X}
+
+Golang developers prefer to work against real databases, file systems, etc.
+
+\subsection{Tests short and long}
+
+\begin{minted}[frame=single]{go}
+if testing.Short() {
+  t.Skip("skipping test in short mode.")
+}
+\end{minted}
+
+\subsection{Integration tests}
+
+The best practice is to use build tags to distinguish integration tests:
+
+\begin{minted}[frame=single]{go}
+// +build integration
+
+package service_test
+
+func TestSomething(t *testing.T) {
+  if service.IsMeaningful() != 42 {
+    t.Errorf("oh no!")
+  }
+}
+\end{minted}
+
+To run:
+
+\begin{minted}{bash}
+go test --tags integration ./...
+\end{minted}
+
+\subsubsection{Look ahead}
+There is much more:
+
+\begin{itemize}
+\item If your functions \href{https://blog.chewxy.com/2018/03/18/golang-interfaces/}{accept interfaces, return structs}, they are easier to test.
+\item Check the brilliant blog on \href{https://peter.bourgon.org/go-for-industrial-programming/}{Go for Industrial Programming} and \href{https://www.youtube.com/watch?v=PTE4VJIdHPg}{the corresponding video}.
+\item If you like the BDD style, look into \href{https://github.com/onsi/ginkgo}{ginko} and \href{gomega}{https://github.com/onsi/gomega}.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagebreak
+\section{Your basic web app}
+
+Knowing the basics of Golang, let's build a web application.
+
+\subsection{Simplest}
+
+Writing a web server in Golang, thanks to very solid standard library, is faily simple:
+
+\begin{minted}[frame=single]{go}
+package main
+
+import (
+  "io"
+  "log"
+  "net/http"
+)
+
+func main() {
+  hello := func(w http.ResponseWriter, r *http.Request) {
+    io.WriteString(w, "Hello World!")
+  }
+
+  // Run http server on port 8080
+  err := http.ListenAndServe(":8080", http.HandlerFunc(hello))
+
+  // Log and die, in case something go wrong
+  log.Fatal(err)
+}
+\end{minted}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Multiplexed}
+
+To multiplex, we need to create a Multiplexer:
+
+\begin{minted}[frame=single]{go}
+package main
+
+import (
+    "io"
+    "log"
+    "net/http"
+)
+
+func main() {
+  mux := http.NewServeMux()
+
+  mux.HandleFunc("/hello", func(w http.ResponseWriter,
+      r *http.Request) {
+    io.WriteString(w, "Hello")
+  })
+  
+  mux.HandleFunc("/world", func(w http.ResponseWriter,
+      r *http.Request) {
+    io.WriteString(w, "World")
+  })
+
+  log.Fatal(http.ListenAndServe(":8080", mux))
+}
+\end{minted}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Handler as a struct}
+
+To customize handler, we can create a \verb|struct|
+
+\begin{minted}[frame=single]{go}
+type MyHandler struct {
+  Greeting string
+}
+
+func (h *MyHandler) ServeHTTP(w http.ResponseWriter,
+    r *http.Request) {
+  fmt.Fprintf(w, "%s, %s!", h.Greeting, r.RemoteAddr)
+}
+
+func main() {
+  log.Fatal(http.ListenAndServe(":8080", &MyHandler{
+    Greeting: "Hello World!",
+  }))
+}
+\end{minted}
+
+\subsubsection{Sharing data structures among handlers}
+
+The following example shows how to share data among handlers, e.g., database connection details, configs:
+
+\begin{minted}[frame=single]{go}
+package main
+
+import (
+  "fmt"
+  "log"
+  "net/http"
+)
+
+type App struct {
+  ServiceName string
+  // Datasource
+  // logging config
+}
+
+func (app *App) HelloWorld(w http.ResponseWriter,
+    r *http.Request) {
+  w.WriteHeader(http.StatusOK)
+  fmt.Fprintf(w, "Hello World from " + app.ServiceName)
+}
+
+func main() {
+  app := App{ServiceName: "MyApp"}
+  mux := http.NewServeMux()
+  mux.HandleFunc("/", app.HelloWorld)
+
+  log.Fatal(http.ListenAndServe(":8080", mux))
+}
+\end{minted}
+
+\subsubsection{Reading body}
+
+Extend the previous example to read the data passed with http body:
+
+\begin{minted}[frame=single]{go}
+func (h *Handler) ServeHTTP(w http.ResponseWriter,
+      r *http.Request) {
+  var data bytes.Buffer // []byte with IO
+  
+  // body, err := ioutil.ReadAll(r.Body)
+  n, err := data.ReadFrom(r.Body) // read body to the buffer
+  if err != nil {  
+    panic(err) 
+  }
+
+  log.Printf("Got %d bytes from %s: %s\n", n, r.RemoteAddr,
+    data.String())
+}
+\end{minted}
+
+Test it:
+
+\begin{minted}{text}
+$ curl -d '{"name": "natalia"}' 127.0.0.1:8080 
+\end{minted}
+
+
+\subsubsection{Parse URL}
+
+We have also support for parsing URL in \href{https://golang.org/pkg/net/url/}{net/url Package}:
+
+\begin{minted}[frame=single]{go}
+// "lang=pl"
+q := r.URL.Query()
+lang := q.Get("lang")
+\end{minted}
+
+\subsubsection{Write multilingual hello-world app}
+
+Multilingual hello-world app supports 
+
+\begin{itemize}
+\item US1: \emph{lang} on path \verb|/| as a GET parameter to specify language \\
+       \emph{user} as a GET parameter to specify username for the greetings.
+\item US2: \emph{lang} and  \emph{user} in body: \verb|user:Wojtek,lang:pl|.
+\item if \emph{lang} is missing, return 400.
+\item if \emph{user} is missing, return 404.
+\end{itemize}
+
+\subsubsection{Testing handlers}
+
+Create tests to cover the edge cases:
+
+\begin{minted}[frame=single]{go}
+func TestHandlers(t *testing.T) {
+  // Your handler to test
+  handler := func(w http.ResponseWriter, r *http.Request) {
+    http.Error(w, "Uh huh", http.StatusBadRequest)
+  }
+
+  // Create a request
+  r, err := http.NewRequest("GET",
+    "http://test.com?lang=pl&user=wojtek", nil)
+
+  // Handle request and store result in w
+  w := httptest.NewRecorder()
+  handler(w, r)
+
+  // Check out
+  if w.Code != http.StatusOK {
+    t.Fatal(w.Code, w.Body.String())
+  }
+}
+\end{minted}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Working with JSON}
+
+Let's change the input in body for our service to:
+
+\begin{minted}[frame=single]{json}
+{
+  "name": "Natalia",
+  "lang": "en"
+}
+\end{minted}
+
+To learn how to use marshalling and unmarshalling, let's write a simple program that uses \href{https://golang.org/pkg/encoding/json/}{encoding/json package}:
+
+\begin{minted}[frame=single]{go}
+package main
+
+import (
+  "encoding/json"
+  "fmt"
+)
+
+type Employee struct {
+  FistName    string `json:"name"`
+  LastName    string
+  Internal    string `json:"-"`
+  Mandatory   int    `json:"mandatory"`
+  Zero        int    `json:"zero,omitempty"`
+  iDoNotSeeIt int    `json:"notSeen"`
+}
+
+func main() {
+  input := `{
+    "name": "natalia",
+    "lastName": "Buss"
+  }`
+
+  var empl Employee
+  err := json.Unmarshal([]byte(input), &empl)
+  if err != nil {
+    // ...
+    return
+  }
+  fmt.Println(empl.FistName)
+  fmt.Println(empl.LastName)
+
+  empl.Mandatory = 0
+  empl.Zero = 0
+
+  out, _ := json.Marshal(empl)
+  fmt.Println(string(out))
+}
+\end{minted}
+
+Notice: you can build your custom Marshaller/Unmarsheller. \verb|json| supports all data types.
+
+\bigskip
+
+Find out what \verb|json.RawMessage| is? What is a use case for it?
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Support POST and GET with gorilla/mux}
+
+If you want to build more complex web server, you should check \href{https://github.com/gorilla/mux}{gorilla/mux}:
+
+\begin{minted}[frame=single]{go}
+package main
+
+import (
+  "fmt"
+  "log"
+  "net/http"
+  "github.com/gorilla/mux"
+)
+
+func HelloGetHandler(w http.ResponseWriter, r *http.Request) {
+  w.WriteHeader(http.StatusOK)
+  fmt.Fprintf(w, "GET")
+}
+
+func AddMsgHandler(w http.ResponseWriter, r *http.Request) {
+  w.WriteHeader(http.StatusOK)
+  fmt.Fprintf(w, "Post")
+}
+
+func main() {
+  r := mux.NewRouter()
+  r.HandleFunc("/", HelloGetHandler).Methods("GET")
+  r.HandleFunc("/", AddMsgHandler).Methods("POST")
+
+  log.Fatal(http.ListenAndServe(":8080", r))
+}
+\end{minted}
+
+Refactor your application to use \verb|gorilla/mux|.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Web app with memory storage}
+
+Build the following application, so we can add, display, and remove hello messages:
+
+\begin{markdown}
+- \verb|/hello_msg|, \verb|POST| - add new hello message
+- \verb|/say_hello?user=natalia&lang=en|, \verb|GET| - say hello
+- \verb|/hello_msg|, \verb|GET| - list all messages
+- \verb|/hello_msg/{id}|, \verb|DELETE| - remove hello message
+\end{markdown}
+
+Start as a simple array, later we can build it as a map.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{ReadTimeout and WriteTimeout for http.Server}
+Remember that all IO operations should be cancel-able or timeout-able:
+
+\begin{minted}[frame=single]{go}
+srv := &http.Server{
+  Addr: "8080",
+  Handler: h,
+  ReadTimeout: 2s,
+  WriteTimeout:2s,
+  MaxHeaderBytes: 1 << 20,
+}
+
+srv.ListenAndServe()
+\end{minted}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagebreak
+\section{Calling remote APIs}
+
+\begin{minted}{go}
+package main
+
+import (
+  "log"
+  "net/http"
+  "time"
+)
+
+func main() {
+  c := &http.Client{
+    Timeout: 2 * time.Second,
+  }
+
+  log.Println("Fetching...")
+  resp, err := c.Get(
+    "https://mdn.github.io/learning-area/javascript/oojs/json/superheroes.json")
+
+  if err != nil {
+    log.Fatal(err)
+  }
+  defer resp.Body.Close()
+}
+\end{minted}
+
+Your task is to parse the output. While looking for the best way to parse it, use your writing-tests skills, so you do not DDOS mdn.github.io.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Build Hero API Client}
+
+Refactor the previous application and extract fetching list of herous to a \verb|HeroClient|:
+
+\begin{minted}[frame=single]{go}
+type HeroClient struct {
+  Client *http.Client
+}
+
+func (c *HeroClient) GetThem() (string, error) {
+  // your code
+}
+
+func main() {
+  c := &http.Client{
+    Timeout: 2 * time.Second,
+  }
+
+  hc := HeroClient{Client: c}
+  
+  // your code to read and display 
+  // superheroes JSON
+}
+\end{minted}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Testing Calling remote APIs}
+
+You can also test whether your calls have proper format by using \mintinline{go}{httptest}:
+
+\begin{minted}[frame=single]{go}
+package main
+
+import (
+  "fmt"
+  "net/http"
+  "net/http/httptest"
+  "testing"
+
+  "gotest.tools/assert"
+)
+
+func TestHeroClientAPI(t *testing.T) {
+
+  server := httptest.NewServer(
+    http.HandlerFunc(
+      func(rw http.ResponseWriter, req *http.Request) {
+        // Send response to be tested
+        assert.Equal(t, req.URL.String(), "/some/path") 
+        rw.Write([]byte(`OK`))
+      }),
+  )
+
+  // Close the server when test finishes
+  defer server.Close()
+  // Use Client & URL from our local test server
+  api := HeroClient{server.Client()}
+  r, err := api.GetThem()
+  assert.NilError(t, err)
+  fmt.Println(r)
+}
+\end{minted}
+
+Please refactor your code from previous exercise, add GET argument, and~write the test.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Working with files}
+
+Based on https://gobyexample.com/writing-files and https://gobyexample.com/reading-files:
+
+\begin{markdown}
+1. read /etc/passwd and find a line numer with your user
+2. transform passwd to json (name, pid, gid, and path) and write to \verb|${HOME}/passwd.json|
+\end{markdown}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% https://gobyexample.com/command-line-flags
+\section{Parsing CLI args}
+
+For this exercise, we will use an example from \href{https://gobyexample.com/command-line-flags}{gobyexample.com/command-line-flags}:
+
+\begin{minted}[frame=single]{go}
+package main
+
+import "flag"
+import "fmt"
+
+func main() {
+
+    wordPtr := flag.String("word", "foo", "a string")
+
+    numbPtr := flag.Int("numb", 42, "an int")
+    boolPtr := flag.Bool("fork", false, "a bool")
+
+    var svar string
+    flag.StringVar(&svar, "svar", "bar", "a string var")
+
+    flag.Parse()
+
+    fmt.Println("word:", *wordPtr)
+    fmt.Println("numb:", *numbPtr)
+    fmt.Println("fork:", *boolPtr)
+    fmt.Println("svar:", svar)
+    fmt.Println("tail:", flag.Args())
+}
+\end{minted}
+
+build a program that prints all files or directories in a given \emph{path}. The program should let us to specify regex for the file or directories names.
+
+\bigskip
+
+How would you test the CLI app? 
+
+\bigskip
+
+The most popular Golang library for CLI application is \href{https://github.com/spf13/cobra}{github.com/spf13/cobra}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{References}
+
+\begin{markdown}
+- https://github.com/golang/go/wiki/CodeReviewComments
+- https://golang.com/doc/effective_go.html
+- http://devs.cloudimmunity.com/gotchas-and-common-mistakes-in-go-golang
+\end{markdown}
+
+\end{document}
