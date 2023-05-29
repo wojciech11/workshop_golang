@@ -26,6 +26,24 @@ Intro
 
 ---
 <!-- _class: lead -->
+## The most important
+
+From https://go.dev/blog/gopher:
+
+![](https://go.dev/blog/gopher/header.jpg)
+
+
+
+---
+<!-- _class: lead -->
+## The most important
+
+From https://github.com/ashleymcnamara/gophers:
+
+![](https://raw.githubusercontent.com/ashleymcnamara/gophers/master/Unicorn_Gopher.png)
+
+---
+<!-- _class: lead -->
 ## Provebs
 
 - [https://go-proverbs.github.io/](https://go-proverbs.github.io/)

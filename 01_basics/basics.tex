@@ -238,6 +238,17 @@ Notice: you can generate a link to your code sample.
 \bigskip
 0. Create new program \verb|hello-world| (directory in \mintinline{bash}{workspace/}). Copy the \verb|main.go| from our \verb|first_project| project.
 
+\begin{minted}[frame=single]{go}
+package main
+
+import "fmt"
+
+func main() {
+  // 1 tabulator
+  fmt.Println("Hello! YOUR_NAME")
+}
+\end{minted}
+
 \bigskip
 1. Please extract your name as a variable, use the following definitions and mark the incorrect ones:
 
@@ -260,6 +271,9 @@ myName = "Natalia"
 // 5
 var myName string
 myName := "Natalia"
+
+// see which combo works:
+fmt.Println("Hello!", myName)
 \end{minted}
 
 Notice: in Golang, we use **camelCase** for variable names.
