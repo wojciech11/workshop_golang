@@ -12,7 +12,7 @@ Recommended: you should have an Github or Gitlab account.
 
 ## Your workstation
 
-- Linux or OSX;
+- Linux (can be a virtual machine with VirtualBox or VMWare) or OSX;
 - Installed:
 
   - Golang;
