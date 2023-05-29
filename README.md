@@ -1,6 +1,6 @@
 # Golang Workshop
 
-0. [Set up your workstation](00_preparation/README.md) ([pdf](00_preparaton/workstation.pdf));
+0. [Set up your workstation](00_preparation/README.md);
 
 1. Module 1 - [basics 1/2](01_basics/basics.pdf):
 
