@@ -1,0 +1,100 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{enumerate}
+\usepackage{listings}
+\usepackage{fancyvrb}
+\usepackage{kotex}
+\usepackage{polski}
+\usepackage[document]{ragged2e} % keep all left
+\usepackage[english]{babel}
+
+\usepackage{minted} % yaml syntax highlighting
+
+\newenvironment{markdown}%
+    {\VerbatimEnvironment\begin{VerbatimOut}{tmp.markdown}}%
+    {\end{VerbatimOut}%
+        \immediate\write18{pandoc tmp.markdown -t latex -o tmp.tex}%
+        \input{tmp.tex}}
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\newcommand*{\email}[1]{\href{mailto:#1}{\nolinkurl{#1}} }
+
+\title{Golang Programming Workshop\\Intermediate\\{ \small \href{https://creativecommons.org/licenses/by/4.0/}{CC BY 4.0} }  }
+\author{Wojciech Barczynski}
+\date{}
+
+\begin{document}
+\selectlanguage{english}
+
+\begin{titlepage}
+\maketitle
+\end{titlepage}
+
+\tableofcontents
+\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{{\small CLI} app with cobra13}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Generics}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Golang concurrency}
+
+Golang concurrency:\begin{itemize}
+\item green threads (go routines)
+\item can run hundreds of thousands routines
+\item low overhead (dynamic stack)
+\item channels for communication
+\item scalable model
+\item you cannot control them
+\item see also Rob Pike’s talk Concurrency is not parallelism\footnote{\href{https://blog.golang.org/concurrency-is-not-parallelism}{blog.golang.org/concurrency-is-not-parallelism}}
+\end{itemize}
+
+Basic primitives: \begin{itemize}
+\item Spawning goroutine: \mintinline{go}{go myFunc()}
+\item Share memory by communicating with channels: \mintinline{go}{chan}
+\item Subcribe to multiple channels: \mintinline{go}{select}
+\item If you cannot use channel, you have also mutexes: \mintinline{go}{sync.Mutex}
+Coordinate multiple goroutines: \mintinline{go}{sync.WaitGroup}
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Goroutines}
+
+The first meeting with Goroutines:
+\begin{minted}[frame=single]{go}
+
+package main
+import (
+   "fmt"
+  "time"
+)
+func say(s string, num int) {
+   for i := 0; i < num; i++ {
+     time.Sleep(100 * time.Millisecond)
+     fmt.Println(s)
+   }
+}
+
+func main() {
+   go say("world", 5)
+   say("hello", 5)
+}
+\end{minted}
+
+
+\begin{itemize}
+\item What is the output?
+\item What is the output when change 5 to 10 for saying world.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Simple producer and consumer}
+
+\end{document}
+

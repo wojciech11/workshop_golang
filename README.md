@@ -2,7 +2,7 @@
 
 0. [Set up your workstation](00_preparation/README.md);
 
-1. Module 1 - [basics 1/2](01_basics/basics.pdf):
+1. Module 1 - [basics 1/2](01_basics/basics.pdf) / [introduction slides](01_intro/slides.pdf):
 
    - packages
    - go mod, go get, go build, go install
@@ -17,32 +17,33 @@
    - arrays and slices
    - maps
    - methods
-   - first basic web app with chi
+   - first basic web app with [chi](https://github.com/go-chi/chi)
 
 2. Module 2 - [basics 2/2](02_basics/basics_2.pdf):
  
    - project structure
    - unit tests
    - errors and error handling
-   - defer, panic
+   - defer and panic
    - working with JSON
    - (file) io / Working with files
-   - web app with standard library
+   - package `net/http`
+   - second web app with [chi](https://github.com/go-chi/chi)
 
-3. Module 3 - building apps and goroutines:
+3. Module 3 - building apps:
 
-   - CLI app with cobra
-   - Working with JSON
-   - marshall/unmarshall (ser/deser)
+   - web app API
    - db access
+   - observability
+   - [goreleaser](https://goreleaser.com/)
+   - debugger
+
+4. Module 4 - [intermediate](04_intermediate/intermeduate.pdf):
+
+   - CLI app with [cobra](https://github.com/spf13/cobra)
+   - generics
    - goroutines
    - channels
-
-4. Module 4 - observability:
-
-   - logging
-   - monitoring
-   - traces
 
 <!-- stdlib
 ide: AC, def/usage, debug
@@ -54,8 +55,12 @@ parsing cli args
 logging
  -->
 
-5. Extras:
+5. Module 5 - Advanced:
 
-   - Building apps in Golang for CloudNative/Kubernetes,
-   - 12factor apps,
-   - GraphQL.
+   - [Building apps in Golang for CloudNative/Kubernetes](https://github.com/wojciech12/workshop_kubernetes_and_cloudnative),
+   - Kubernetes operators.
+
+6. Extras:
+
+   - GraphQL API,
+   - gRPC.

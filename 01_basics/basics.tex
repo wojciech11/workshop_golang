@@ -624,16 +624,46 @@ for condition { }
 for { }
 \end{minted}
 
+\bigskip
+
+Gotcha. \textbf{Do not do it}. What is this program going to print:
+
+\begin{minted}[frame=single]{go}
+package main
+
+import "fmt"
+
+func nameByKey(names map[string]string, key string) *string {
+  var result *string
+
+  for k, v := range names {
+    if key == k {
+      result = &v
+    }
+  }
+  return result
+}
+
+func main() {
+  names := map[string]string{"12": "mike",
+    "34": "joe", "99": "Joanna"}
+
+  found := nameByKey(names, "12")
+
+  fmt.Printf("%s", *found)
+}
+\end{minted}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{String}
 
-String is a read-only \textbf{slice} of bytes. Go source code is always in {\small UTF}-8.
+String is a read-only \textbf{slice} of bytes. Go source code is always in {\small UTF}-8. If you want to learn more about UTF-8, this post is a good start \href{https://www.joelonsoftware.com/2003/10/08/the-absolute-minimum-every-software-developer-absolutely-positively-must-know-about-unicode-and-character-sets-no-excuses/}{Joel On Software on unicode}.
 
 \bigskip
 1. Run the following code, note down the results:
 
 \begin{minted}[frame=single]{go}
-const adress := "ul. Przeskok 2"
+const adress = "ul. Przeskok 2"
 
 fmt.Printf("len: %d\n", len(adress))
 
@@ -665,21 +695,24 @@ for index, runeValue := range milk {
 \begin{minted}[frame=single]{go}
 const milk = "우유"
 
-  for i := 0; i < len(milk); i++ {
-    fmt.Printf("byte: %x at the index %d\n",
-      milk[i], i)
-  }
+for i := 0; i < len(milk); i++ {
+	fmt.Printf("byte: %x at the index %d\n",
+		milk[i], i)
+}
 \end{minted}
 
-Now let's mix things up, write a short program that prints runes for:\\ \mintinline{go}{const mixed = "wöjtk유wx"}.
+Your task -- write a short program (following the above example) that prints runes for:\\ \mintinline{go}{const mixed = "wöjtk유wx"}.
 
 \bigskip
-Notice: Important packages are \verb|Package strings| (\href{https://pkg.go.dev/strings}{pkg.go.dev/strings}) and \verb|Package unicode/utf8| (\href{https://pkg.go.dev/unicode/utf8}{pkg.go.dev/unicode/utf8}).
+Notice: Important packages are \verb|Package strings| (\href{https://pkg.go.dev/strings}{pkg.go.dev/strings}) and \verb|Package unicode/utf8| (\href{https://pkg.go.dev/unicode/utf8}{pkg.go.dev/unicode/utf8}), e.g., \mintinline{go}{utf8.RuneCountInString}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Maps}
 
-Build a program that displays a hello-world message for different languages.
+Your task -- write a program that displays a hello-world message for different languages. An user will provide language code (two letter) and:\begin{itemize}
+\item if we support the language, we should print out the greetings,
+\item if we do not support the language, we should write \verb|language not supported|.
+\end{itemize}
 
 1. Define the map:
 
@@ -704,7 +737,7 @@ Build a program that displays a hello-world message for different languages.
 \end{minted}
 
 \bigskip
-2. Print the hello message:
+3. Print the hello message:
 
 \begin{minted}[frame=single]{go}
 if val, ok := helloMsgs[lang]; ok {
@@ -715,7 +748,7 @@ if val, ok := helloMsgs[lang]; ok {
 \end{minted}
 
 \bigskip
-3. Notice, Golang has a cool feature:
+Notice, Golang has a cool feature:
 
 \begin{minted}[frame=single]{go}
   helloMsgs := map[string]string{
@@ -724,19 +757,19 @@ if val, ok := helloMsgs[lang]; ok {
   }
 \end{minted}
 
-We want to have different greetings depending on the time of day:
+You could extend the app and print out different greetings depending on the time of day:
 
 \begin{minted}[frame=single]{go}
   helloMsgs := map[string]map[string]string{
     "pl": {"morning": "Dzień Dobry"},
-    "en": {"morning": "Good morning"},
+    "en": {"morning": "Good morning", 
+           "evening": "good evening"},
   }
 \end{minted}
 
-Now, users got bored with the same greeting:
+If users get bored with the same greeting, we could randomly pick greetings:
 
 \begin{minted}[frame=single]{go}
-
   helloMsgs := map[string]map[string][]string{
     "pl": {"morning": []string{
       "Dzień Dobry",
@@ -752,12 +785,13 @@ Now, users got bored with the same greeting:
 Let's make it more readable:
 
 \begin{minted}[frame=single]{go}
-  type daytimeGreetings map[string][]string
-  type g map[string]daytimeGreetings
+  type daytimeGreetings = map[string][]string
+  // type g map[string]daytimeGreetings
 
   helloMsgs := map[string]daytimeGreetings{
     "pl": {"morning": []string{
       "Dzień Dobry",
+      "Piękny poranek",
     }},
     "en": {"morning": []string{
       "Good morning",
@@ -768,10 +802,10 @@ Let's make it more readable:
 You can use this declarative style to define even the most complex {\small JSON} structures.
 
 \bigskip
-4. Write a program that randomize the messages, use \emph{math/rand} and \emph{time} packages to initialize random seed.
+Your task -- extend your program to offer multiple greetings per language (without the support for the time of the day). You should pick the greeting randomly. For this purpose, use \emph{math/rand} and \emph{time} packages to initialize random seed.
 
 \bigskip
-5. [Homework] Use time information to find out which part of the day we have.
+Idea for the homework -- use the current time to find out which part of the day we have.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{User defined type}
@@ -845,7 +879,7 @@ func displayHello(lang string) (bool) {
 \end{minted}
 
 \bigskip
-2. Let's follow the golang way and return an error:
+2. In Golang, we do not have exceptions, we return errros for unexpected scenarios. The error is usually the last returned value from a function:
 
 \begin{minted}[frame=single]{go}
 func displayHello(lang string) (err error) {
@@ -865,7 +899,7 @@ func main() {
 \end{minted}
 
 \bigskip
-3. Functions are the first class citizens in Golang and we often use them as arguments. Let's write new program:
+3. The functions are the first class citizens in Golang and we often use them as arguments. Let's write new program:
 
 \begin{minted}[frame=single]{go}
 func printThings(msg []string, decorator func(string) string) {
@@ -885,7 +919,7 @@ func main() {
 }
 \end{minted}
 
-Now something more complicated:
+Now something more complicated, defining a function in-place:
 
 \begin{minted}[frame=single]{go}
 type letterDecorator func(string) string
@@ -920,7 +954,7 @@ printSymbols(alphabet...)
 \end{minted}
 
 \bigskip
-5. We can move the execution of a function to the end of the scope with \verb|defer|:
+5. We can move the execution of a function to the end of the scope with \mintinline{go}{defer}:
 
 \begin{minted}[frame=single]{go}
 package main
@@ -943,9 +977,9 @@ We will come back to \mintinline{go}{defer} later in this workshop.
 
 \subsection{switch}
 
-The \emph{switch} can work on any data type, you do not need to switch on a value, see: \href{Golang Wiki}{https://github.com/golang/go/wiki/Switch}.
+The \mintinline{go}{switch} can work on any data type, you do not need to switch on a value, see: \href{Golang Wiki}{https://github.com/golang/go/wiki/Switch}.
 
-The very common case for \emph{switch} is to check types:
+The very common case for \mintinline{go}{switch} is to check types:
 
 \begin{minted}[frame=single]{go}
 func do(v interface{}) string {
@@ -1048,7 +1082,40 @@ func main() {
 }
 \end{minted}
 
-\textbf{Notice}, we can return in functions pointers to local variables: \mintinline{go}{func Answer() *int}.
+\textbf{Notice}, we can return in functions pointers to local variables: \mintinline{go}{func Answer() *int}. Later, you should read about the analysis\footnote{\href{https://github.com/golang/go/wiki/CompilerOptimizations\#escape-analysis}{github.com/golang/go/wiki/CompilerOptimizations\#escape-analysis}} and its impact on the Golang apps performance.
+
+\pagebreak
+
+%%%%%%%%%%%%%%%%%
+\section{Enums}
+
+Enums in Golang:
+
+\begin{minted}[frame=single]{go}
+const (  // iota is reset to 0
+        c0 = iota  // c0 == 0
+        c1 = iota  // c1 == 1
+        c2 = iota  // c2 == 2
+)
+\end{minted}
+
+Enums in Golang with methods (example from \href{https://stackoverflow.com/questions/14426366/what-is-an-idiomatic-way-of-representing-enums-in-go}{stackoverflow}):
+
+\begin{minted}[frame=single]{go}
+type Base int
+
+const (
+    A Base = iota
+    C
+    T
+    G
+)
+
+func(b Base) AnyMethod()  {
+}
+\end{minted}
+
+\pagebreak
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Structures}
@@ -1058,7 +1125,7 @@ In Golang, we do not have \emph{classes}, instead \emph{struct} with \emph{metho
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Structures and Methods}
 
-1. Write a program to manage employees:
+1. Write a program to manage employees \mintinline{bash}{go mod init employee_app}:
 
 \begin{minted}[frame=single]{go}
 package main
@@ -1066,11 +1133,11 @@ package main
 type Employee struct {
     FirstName   string
     LastName    string
-    leavesTotal int
+    leavesAllowed int
     LeavesTaken int
 }
 
-func (empl *Employee) TakeHolidays(days int) error {
+func (empl *Employee) TakeHolidays(days int) bool {
   // write an implementation
 }
 
@@ -1080,9 +1147,11 @@ func (empl *Employee) limitExceeded(days int) bool {
 
 func main() {
   empl := new(Employee)
+  // fmt.Println(reflect.TypeOf(empl))
+
   empl.FirstName = "Laste"
   empl.LastName = "BB"
-  empl.leavesTotal = 26
+  empl.leavesAllowed = 26
   fmt.Println(empl.FirstName)
   // simulate here taking day offs
   // and printing the new value.
@@ -1090,8 +1159,6 @@ func main() {
   // try to call limitExceeded on empl
 }
 \end{minted}
-
-\bigskip
 
 % Question: How to init the Employee outside our package?
 
@@ -1121,7 +1188,7 @@ package employee
 type Employee struct {
   FirstName   string
   LastName    string
-  leavesTotal int
+  leavesAllowed int
 }
 
 // ... the functions
@@ -1141,7 +1208,7 @@ package employee
 type employee struct {
   FirstName   string
   LastName    string
-  leavesTotal int
+  leavesAllowed int
 }
 
 // ... rest of the code
@@ -1161,32 +1228,34 @@ Does your app works? How we should solve this problem.
 % }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Pointer receiver vs value receiver}
+\subsection{Pointer receiver vs value receiver}
 
 What is the difference?
 
 \begin{minted}[frame=single]{go}
-func (empl *Employee) TakeHollidays(taken int) {
+func (empl *Employee) TakeHollidays(taken int) bool {
     empl.leavesTaken = empl.leavesTaken + taken
+    return true
 }
 \end{minted}
 
 and:
 
 \begin{minted}[frame=single]{go}
-func (empl Employee) TakeHollidays(taken int) {
+func (empl Employee) TakeHollidays(taken int) bool {
     empl.leavesTaken = empl.leavesTaken + taken
+    return true
 }
 \end{minted}
 
 Write a new app to find out.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Structures and Interfaces}
+\subsection{Structures and Interfaces}
 
 In Golang, we have duck typing interfaces, it means that the structure has to implement the functions from the interface.
 
-An example, we will build an application that supports two storage types - postgres and mongo:
+An example, we will build an application that supports two storage types - postgres and mongo (\mintinline{bash}{go mod init db-example-app}):
 
 \begin{minted}[frame=single]{go}
 package main
@@ -1235,15 +1304,20 @@ func (ps *MongoStore) GetEmployee(id int) string {
 
 Run the app and verify that the mongoStore works as well. When it works, break it, for e.g., change the type of args in \mintinline{go}{MongoStore}.
 
+\bigskip
+Notice: a good rule of tumb for methods -- \emph{accept an interface, return a struct}. However. Don’t over complicate code until it’s needed.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Composition instead of Inheritance}
+\subsection{Composition instead of Inheritance}
+
+Golang does not support inheritance. Instead, it supports the composition. We achieve the composition by embedding one struct type into another:
 
 \begin{minted}[frame=single]{go}
 type person struct {
   firstName string
 }
 
-func (p person) name() string {
+func (p *person) name() string {
   return p.firstName
 }
 
@@ -1263,7 +1337,7 @@ func main() {
 Notice: For polymorphism, you need to use \emph{interface}.
 
 %%%
-\section{Interfaces vs Functions}
+\subsection{Interfaces vs Functions}
 
 If you get high on interface, do not forget that you can use functions instead. See an example from~\href{https://golang.org/src/net/http/server.go}{net/http}:
 
@@ -1321,10 +1395,14 @@ func main() {
 }
 \end{minted}
 
+\pagebreak
+
 %%%%%%%%%%%%%%%%%
 \section{First Web App}
 
 Now, we will build our first web app before going to the 2nd part of the basics. We will use \href{https://github.com/go-chi/chi}{github.com/go-chi/chi}.
+
+\bigskip
 
 1. Create an app: \emph{first\_web\_app}, install the \verb|chi| package.
 
@@ -1351,11 +1429,17 @@ func main() {
   http.ListenAndServe(":3000", r)
 }
 \end{minted}
+\bigskip
+Test whether it works with, for example \verb|curl|:\begin{minted}{bash}
+curl '127.0.0.1:3000/'
+\end{minted}
 
 \bigskip
-3. Tasks: \begin{enumerate}
+3. Tasks - test after every iteration: \begin{enumerate}
 \item add endpoint \verb|/hello|, that returns \verb|world|;
-\item add support for adding name: \verb|/hello?name=natalia|, should return: \verb|Hello Natalia!|;
+\item add support for adding name: \verb|/hello?name=natalia|, should return: \verb|Hello Natalia!|;\begin{minted}{bash}
+curl '127.0.0.1:3000/hello?name=natalia'
+\end{minted}
 \item add support for language as a {\small GET} parameter;
 \item move all the logic to a separate package \verb|greetings|;
 \item Use one of the middlewares, e.g., \verb|SetHeader| or \verb|BasicAuth|.
@@ -1367,7 +1451,7 @@ func main() {
 Linters are a part of the language:
 
 \begin{markdown}
-- gofmt
+- gofmt - `Gofmt's style is no one's favorite, yet gofmt is everyone's favorite.` ([go proverb](https://go-proverbs.github.io))
 - goimport - gofmt + sorting imports
 - govet - now executed with tests
 \end{markdown}

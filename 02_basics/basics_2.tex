@@ -41,6 +41,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Golang project layout}
 
+How to think about the Golang project layout:
+
 \begin{itemize}%
 \item No rigid project structure;
 \item The best practice is to keep things simple;
@@ -89,7 +91,7 @@ Iteration 3:
 \- README.md
 \end{verbatim}
 
-Iteration 4 - \verb|pkg| might be a good idea if you have other technologies in your repository:
+Iteration 4 - \verb|pkg| might be a good idea if you have other technologies in~your repository:
 
 \begin{verbatim}
 |- cmd/
@@ -115,13 +117,16 @@ Good source of inspiration:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Naming conventions in Golang}
 
+Naming conventions:
+
 \begin{itemize}%
-\item camelCase: variables, function names, and files (\href{https://go.dev/doc/effective\_go\#mixed-caps}{go.dev/doc/effective\_go\#mixed-caps});
+\item camelCase (\href{https://go.dev/doc/effective\_go\#mixed-caps}{go.dev/doc/effective\_go\#mixed-caps}): variables, function names;
 \item Acronyms should be all capitals, as in ServeHTTP and IDProcessor;
-\item package names: \begin{itemize}%
+\item file names - \verb|snake_case|;
+\item package names - : \begin{itemize}%
+\item following the business domain,
 \item \href{https://go.dev/doc/effective\_go\#names}{go.dev/doc/effective\_go\#names},
-\item \href{https://go.dev/blog/package-names}{go.dev/blog/package-names},
-\item following the business domain.
+\item \href{https://go.dev/blog/package-names}{go.dev/blog/package-names}.
 \end{itemize}%
 \end{itemize}%
 
@@ -140,7 +145,7 @@ All the best practises for naming functions in other languages apply to Golang a
 \begin{itemize}%
 \item one function one thing,
 \item good name,
-\item not to long.
+\item not too long.
 \end{itemize}%
 
 \bigskip
@@ -158,6 +163,8 @@ type error interface {
 }
 \end{minted}
 
+Let's write a program that use the following function:
+
 \begin{minted}[frame=single]{go}
 package main
 
@@ -173,6 +180,8 @@ func Divide(a, b int) (int, error) {
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Convention}
+
+Handling errors:
 
 \begin{itemize}%
 \item No \verb|try|/\verb|catch| in Golang,
@@ -204,7 +213,7 @@ An example of such errors are: \mintinline{go}{sql.ErrNoRows} and \mintinline{go
 \begin{minted}[frame=single]{go}
 package sql
 
-var errNoRows = errors.New("sql: no Rows available")
+var ErrNoRows = errors.New("sql: no Rows available")
 \end{minted}
 
 The advantage? It is simple to handle:
@@ -212,8 +221,8 @@ The advantage? It is simple to handle:
 \begin{minted}[frame=single]{go}
 err := db.QueryRow("SELECT * FROM users WHERE id = ?", userID)
 
-// the old way:
-if err == sql.ErrNoRows {
+// new way, in the comment the old way:
+if errors.Is(err, sql.ErrNoRows) { //err == sql.ErrNoRows {
   // an error we know
 }  else if err != nil { 
   // another error
@@ -227,7 +236,7 @@ err := db.QueryRow("SELECT * FROM users WHERE id = ?", userID)
 
 if err != nil {
 	switch {
-	// preferable
+	// preferable way:
 	case errors.Is(err, sql.ErrNoRows):
 		// ...
 	default:
@@ -236,7 +245,7 @@ if err != nil {
 }
 \end{minted}
 
-Advantage? Simple. Disadvantage? \begin{itemize}%
+Advantages? Simple. Disadvantages? \begin{itemize}%
 \item Not too much info,
 \item they become a part of your package {\small API}.
 \end{itemize}%
@@ -282,10 +291,12 @@ if err := Foo(); err != nil {
 \end{minted}
 
 \begin{minted}[frame=single]{go}
-// new way
+// modern way
 err := Foo()
 
-if errors.As(&ParsingError{}) {
+var target = &ParsingError{}
+
+if errors.As(err, &target) {
 	// handling the error
 }
 \end{minted}
@@ -293,8 +304,7 @@ if errors.As(&ParsingError{}) {
 Advantages? Disadvantages?
 \bigskip
 
-Notice that you can customzie both \mintinline{go}{Is} and \mintinline{go}{As}.
-\pagebreak
+Notice that you can customzie both \mintinline{go}{errors.Is} and \mintinline{go}{errors.As}\footnote{\href{https://go.dev/blog/go1.13-errors}{go.dev/blog/go1.13-errors}}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Opaque errors}
@@ -329,11 +339,11 @@ You should use this approach to errors as your default along with the custom typ
 
 \inputminted[frame=single]{go}{examples/wrap_errors/main.go}
 
-From \href{https://go.dev/blog/go1.13-errors}{go.dev/blog/go1.13-errors}: \emph{when adding additional context to an error, either with fmt.Errorf or by implementing a custom type, you need to decide whether the new error should wrap the original. There is no single answer to this question; it depends on the context in which the new error is created. Wrap an error to expose it to callers. Do not wrap an error when doing so would expose implementation details}
+From \href{https://go.dev/blog/go1.13-errors}{go.dev/blog/go1.13-errors}: ,,\emph{when adding additional context to an error, either with fmt.Errorf or by implementing a custom type, you need to decide whether the new error should wrap the original. There is no single answer to this question; it depends on the context in which the new error is created. Wrap an error to expose it to callers. Do not wrap an error when doing so would expose implementation details.''}
 
 \bigskip
 
-Your task: implement this error handling in your Employee managemetn application.
+Your task -  implement this error handling in your Employee management application.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Stack trackes}
@@ -416,6 +426,8 @@ If you cannot wait, check \href{https://blog.golang.org/defer-panic-and-recover}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Error best practices}
 
+Few more recommendations:
+
 \begin{itemize}
 \item Handle errors once,
 \item Error, keep on the left,
@@ -440,7 +452,12 @@ Libraries:
 \pagebreak
 \section{Tests}
 
-Create a simple test in a file -- \mintinline{bash}{main_test.go}. To run tests: \mintinline{bash}{go test .}.
+Create a simple test in a file -- \mintinline{bash}{main_test.go}. To run tests: 
+\begin{minted}[frame=single]{bash}
+go test .
+\end{minted}
+
+Here is the test:
 
 \begin{minted}[frame=single]{go}
 package main
@@ -469,7 +486,7 @@ func TestAdd(t *testing.T) {
 
 1. Create a project \verb|workshop-test|:
 
-main.go:
+\verb|main.go|:
 
 \begin{minted}[frame=single]{go}
 package main
@@ -479,14 +496,14 @@ import (
   "fmt"
 )
 
-var errUnknownOperation = errors.New("Unknown operation")
+var ErrUnknownOperation = errors.New("unknown operation")
 
 func Calculate(op string, a int, b int) (int, error) {
   switch op {
   case "+":
     return a + b, nil
   }
-  return 0, errUnknownOperation
+  return 0, ErrUnknownOperation
 }
 
 func main() {
@@ -514,14 +531,14 @@ func TestCalculate(t *testing.T) {
     "simple add": {"+", 1, 3, 4},
   }
 
-  for name, v := range testCases {
-    t.Logf("test: %s", name)
-    r, err := Calculate(v.op, v.a, v.b)
+  for tname, d := range testCases {
+    t.Logf("test: %s", tname)
+    r, err := Calculate(d.op, d.a, d.b)
     if err != nil {
       t.Fatalf("%v", err)
     }
-    if r != v.expected {
-      t.Fatalf("Failed!")
+    if r != d.expected {
+      t.Fatalf("actual %d expected %d", r, d.expected)
     }
   }
 }
@@ -540,10 +557,12 @@ Notice: \verb|go clean -testcache| to clean the cache.
 \bigskip
 2. Add, first the test, support for division.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Test with real X}
 
-Golang developers prefer to work against real databases, file systems, etc.
+In the Golang community, we test against a real databases, file systems, etc. With docker is very easy to spin up a database for your tests. Golang developers use mock libraries as a last resort.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Tests short and long}
 
 \begin{minted}[frame=single]{go}
@@ -552,6 +571,7 @@ if testing.Short() {
 }
 \end{minted}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Integration tests}
 
 The best practice is to use build tags to distinguish integration tests:
@@ -574,18 +594,26 @@ To run:
 go test --tags integration ./...
 \end{minted}
 
-\subsubsection{Look ahead}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Recommended libraries}
+
+\begin{itemize}
+\item \href{https://github.com/stretchr/testify}{github.com/stretchr/testify} - assertions, better visibility;
+\item If you like the BDD style, look into \href{https://github.com/onsi/ginkgo}{ginko} and \href{gomega}{https://github.com/onsi/gomega}.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Look ahead}
 There is much more:
 
 \begin{itemize}
 \item If your functions \href{https://blog.chewxy.com/2018/03/18/golang-interfaces/}{accept interfaces, return structs}, they are easier to test.
 \item Check the brilliant blog on \href{https://peter.bourgon.org/go-for-industrial-programming/}{Go for Industrial Programming} and \href{https://www.youtube.com/watch?v=PTE4VJIdHPg}{the corresponding video}.
-\item If you like the BDD style, look into \href{https://github.com/onsi/ginkgo}{ginko} and \href{gomega}{https://github.com/onsi/gomega}.
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \pagebreak
-\section{Your basic web app}
+\section{Building web app}
 
 Knowing the basics of Golang, let's build a web application.
 
@@ -669,7 +697,10 @@ func main() {
 }
 \end{minted}
 
-\subsubsection{Sharing data structures among handlers}
+\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Sharing data structures among handlers}
 
 The following example shows how to share data among handlers, e.g., database connection details, configs:
 
@@ -703,23 +734,25 @@ func main() {
 }
 \end{minted}
 
-\subsubsection{Reading body}
+\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Reading body}
 
 Extend the previous example to read the data passed with http body:
 
 \begin{minted}[frame=single]{go}
 func (h *Handler) ServeHTTP(w http.ResponseWriter,
-      r *http.Request) {
-  var data bytes.Buffer // []byte with IO
-  
-  // body, err := ioutil.ReadAll(r.Body)
-  n, err := data.ReadFrom(r.Body) // read body to the buffer
-  if err != nil {  
-    panic(err) 
-  }
+			r *http.Request) {
 
-  log.Printf("Got %d bytes from %s: %s\n", n, r.RemoteAddr,
-    data.String())
+	// read body to the buffer
+	body, err := io.ReadAll(r.Body)
+	if err != nil {  
+		panic(err)
+	}
+
+	log.Printf("Got from %s: %s: \n", n,
+		r.RemoteAddr, body)
 }
 \end{minted}
 
@@ -729,10 +762,10 @@ Test it:
 $ curl -d '{"name": "natalia"}' 127.0.0.1:8080 
 \end{minted}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Parse URL}
 
-\subsubsection{Parse URL}
-
-We have also support for parsing URL in \href{https://golang.org/pkg/net/url/}{net/url Package}:
+We have also support for parsing {\small URL} in \href{https://golang.org/pkg/net/url/}{net/url Package}:
 
 \begin{minted}[frame=single]{go}
 // "lang=pl"
@@ -740,21 +773,30 @@ q := r.URL.Query()
 lang := q.Get("lang")
 \end{minted}
 
-\subsubsection{Write multilingual hello-world app}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Write multilingual hello-world app}
 
-Multilingual hello-world app supports 
-
-\begin{itemize}
-\item US1: \emph{lang} on path \verb|/| as a GET parameter to specify language \\
-       \emph{user} as a GET parameter to specify username for the greetings.
-\item US2: \emph{lang} and  \emph{user} in body: \verb|user:Wojtek,lang:pl|.
-\item if \emph{lang} is missing, return 400.
-\item if \emph{user} is missing, return 404.
+Your task is to build a hello-world web {\small API} app with hard-coded dictionary of hello-world in different languages: \begin{itemize}
+\item \verb|pl|: dzień dobry, dobry wieczor
+\item \verb|en|: hi, welcome
+\item \verb|de|: guten tag
 \end{itemize}
 
-\subsubsection{Testing handlers}
+Spec:
+\begin{itemize}
+\item return greetins with user name, when \emph{lang} and \emph{user} come as a {\small GET} param;
+\item either {\small GET} parameter \emph{lang} or \emph{user} is missing return return 400;
+\item if we do not have any entry for a value in \emph{lang} return 404.
+\end{itemize}
 
-Create tests to cover the edge cases:
+Use \verb|curl| or browser to test your web {\small API}:\begin{minted}{bash}
+curl '127.0.0.1:3000?lang=en&user=natalia'
+\end{minted}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Testing handlers}
+
+Create tests to cover the edge cases, suse the following code for the start:
 
 \begin{minted}[frame=single]{go}
 func TestHandlers(t *testing.T) {
@@ -778,14 +820,65 @@ func TestHandlers(t *testing.T) {
 }
 \end{minted}
 
+\bigskip
+Task -- test one of your handlers from the previous excercise.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Libaries for web api}
+
+If you want to build more complex web server, you should check one of the existing libraries, for example: \begin{itemize}
+\item \href{https://github.com/go-chi/chi}{github.com/go-chi/chi}
+\item \href{https://github.com/gin-gonic/gin}{github.com/gin-gonic/gin}
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{ReadTimeout and WriteTimeout for http.Server}
+Remember that all {\small IO} operations should be cancel-able or timeout-able:
+
+\begin{minted}[frame=single]{go}
+srv := &http.Server{
+  Addr: "8080",
+  Handler: h,
+  ReadTimeout: 2s,
+  WriteTimeout:2s,
+  MaxHeaderBytes: 1 << 20,
+}
+
+srv.ListenAndServe()
+\end{minted}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Working with JSON}
+\subsection{Environment variables}
+
+Our application should get the configuration throught environments variables:
+
+\begin{minted}[frame=single]{go}
+package main
+
+import (
+  "fmt"
+  "os"
+)
+
+func main() {
+  envValue, found := os.LookupEnv("LISTEN_PORT")
+  if ! found {
+    envValue = "8080"
+  }
+  fmt.Printf(envValue)
+}
+\end{minted}
+\bigskip
+Notice: you can also use a library for it, e.g.,\\ \href{https://github.com/jessevdk/go-flags}{github.com/jessevdk/go-flags}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Working with {\small JSON}}
 
 Let's change the input in body for our service to:
 
 \begin{minted}[frame=single]{json}
 {
-  "name": "Natalia",
+  "value": "hi",
   "lang": "en"
 }
 \end{minted}
@@ -838,75 +931,63 @@ Notice: you can build your custom Marshaller/Unmarsheller. \verb|json| supports 
 
 Find out what \verb|json.RawMessage| is? What is a use case for it?
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Support POST and GET with gorilla/mux}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{{\small JSON} and composition}
 
-If you want to build more complex web server, you should check \href{https://github.com/gorilla/mux}{gorilla/mux}:
+You can use composition to reuse common structures:
 
 \begin{minted}[frame=single]{go}
-package main
-
-import (
-  "fmt"
-  "log"
-  "net/http"
-  "github.com/gorilla/mux"
-)
-
-func HelloGetHandler(w http.ResponseWriter, r *http.Request) {
-  w.WriteHeader(http.StatusOK)
-  fmt.Fprintf(w, "GET")
+type Meta struct {
+  MasterdataId string `json:"mdId"`
 }
 
-func AddMsgHandler(w http.ResponseWriter, r *http.Request) {
-  w.WriteHeader(http.StatusOK)
-  fmt.Fprintf(w, "Post")
-}
+func GetName(data bytes.Buffer) {
+  // private type
+  type person struct {
+    Name string `json:name`
+    Meta
+  }
 
-func main() {
-  r := mux.NewRouter()
-  r.HandleFunc("/", HelloGetHandler).Methods("GET")
-  r.HandleFunc("/", AddMsgHandler).Methods("POST")
-
-  log.Fatal(http.ListenAndServe(":8080", r))
+  var p person
+  err = json.Unmarshal(data.Bytes(), &p)
 }
 \end{minted}
-
-Refactor your application to use \verb|gorilla/mux|.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Web app with memory storage}
 
-Build the following application, so we can add, display, and remove hello messages:
+Build the following application using \href{https://github.com/go-chi/chi}{github.com/go-chi/chi}, so we can add, display, and remove hello messages:
 
-\begin{markdown}
-- \verb|/hello_msg|, \verb|POST| - add new hello message
-- \verb|/say_hello?user=natalia&lang=en|, \verb|GET| - say hello
-- \verb|/hello_msg|, \verb|GET| - list all messages
-- \verb|/hello_msg/{id}|, \verb|DELETE| - remove hello message
-\end{markdown}
+\begin{itemize}
+\item \verb|/hello_msg|, \verb|POST| - add new hello message, the format: \begin{minted}[frame=single]{json}
+  {"lang": "pl", "msg": "dzień dobry"}
+  \end{minted}
 
-Start as a simple array, later we can build it as a map.
+\item \verb|/say_hello?user=natalia&lang=en|, \verb|GET| - say hello: \begin{minted}[frame=single]{json}
+  {"lang": "en", "msg": "hi Natalia"}
+  \end{minted}
+\item \verb|/hello_msg/{id}|, \verb|GET| - list all messages: \begin{minted}[frame=single]{json}
+  {
+    "result": [
+       {"lang": "en", "msg": "hi"}
+    ]
+  }
+  \end{minted}
+\item \verb|/hello_msg/{id}|, \verb|DELETE| - remove hello message
+\end{itemize}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{ReadTimeout and WriteTimeout for http.Server}
-Remember that all IO operations should be cancel-able or timeout-able:
+Start with a simple array, later use a map. To test your application:
 
-\begin{minted}[frame=single]{go}
-srv := &http.Server{
-  Addr: "8080",
-  Handler: h,
-  ReadTimeout: 2s,
-  WriteTimeout:2s,
-  MaxHeaderBytes: 1 << 20,
-}
+\begin{minted}[frame=single]{bash}
+curl -X POST -H "Content-Type: application/json" \
+     -d '{"lang":"en", "msg": "hi"}' 127.0.0.1:8080/hello_msg
 
-srv.ListenAndServe()
+curl -X GET 127.0.0.1:8080/hello_msg
 \end{minted}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \pagebreak
-\section{Calling remote APIs}
+\section{Calling remote {\small API}}
 
 \begin{minted}{go}
 package main
@@ -929,16 +1010,21 @@ func main() {
   if err != nil {
     log.Fatal(err)
   }
+
+  // TBD: read the respo
+  // and print it out
+
   defer resp.Body.Close()
 }
 \end{minted}
 
-Your task is to parse the output. While looking for the best way to parse it, use your writing-tests skills, so you do not DDOS mdn.github.io.
+Your task is to parse the output. While looking for the best way to parse it, use your writing-tests skills, so you do not {\small DDOS} mdn.github.io.
 
+\pagebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Build Hero API Client}
+\subsection{Build Hero API Client}
 
-Refactor the previous application and extract fetching list of herous to a \verb|HeroClient|:
+Refactor the previous application and extract fetching list of heros to a \verb|HeroClient|:
 
 \begin{minted}[frame=single]{go}
 type HeroClient struct {
@@ -962,7 +1048,7 @@ func main() {
 \end{minted}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Testing Calling remote APIs}
+\subsection{Testing Calling remote {\small API}}
 
 You can also test whether your calls have proper format by using \mintinline{go}{httptest}:
 
@@ -975,16 +1061,16 @@ import (
   "net/http/httptest"
   "testing"
 
-  "gotest.tools/assert"
+  "github.com/stretchr/testify/assert"
 )
 
 func TestHeroClientAPI(t *testing.T) {
-
+  // Send response to be tested
   server := httptest.NewServer(
     http.HandlerFunc(
       func(rw http.ResponseWriter, req *http.Request) {
-        // Send response to be tested
-        assert.Equal(t, req.URL.String(), "/some/path") 
+        // we can check whether the call is right:
+        // assert.Equal(t, req.URL.String(), "/some/path") 
         rw.Write([]byte(`OK`))
       }),
   )
@@ -992,28 +1078,34 @@ func TestHeroClientAPI(t *testing.T) {
   // Close the server when test finishes
   defer server.Close()
   // Use Client & URL from our local test server
-  api := HeroClient{server.Client()}
+  api := HeroClient{Client: server.Client(),
+                    Url: server.URL}
   r, err := api.GetThem()
   assert.NilError(t, err)
   fmt.Println(r)
 }
 \end{minted}
 
-Please refactor your code from previous exercise, add GET argument, and~write the test.
+Please refactor your code from previous exercise, add {\small GET} argument, and~write the test.
+
+\bigskip
+
+Notice: you need to install \href{https://github.com/stretchr/testify\#installation}{github.com/stretchr/testify}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Working with files}
 
-Based on https://gobyexample.com/writing-files and https://gobyexample.com/reading-files:
+Based on \href{https://gobyexample.com/writing-files}{gobyexample.com/writing-files} and \href{https://gobyexample.com/reading-files}{gobyexample.com/reading-files}:
 
 \begin{markdown}
 1. read /etc/passwd and find a line numer with your user
 2. transform passwd to json (name, pid, gid, and path) and write to \verb|${HOME}/passwd.json|
 \end{markdown}
 
+\pagebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % https://gobyexample.com/command-line-flags
-\section{Parsing CLI args}
+\section{Parsing {\small CLI} args}
 
 For this exercise, we will use an example from \href{https://gobyexample.com/command-line-flags}{gobyexample.com/command-line-flags}:
 
@@ -1043,15 +1135,14 @@ func main() {
 }
 \end{minted}
 
-build a program that prints all files or directories in a given \emph{path}. The program should let us to specify regex for the file or directories names.
+Task -- your program should prints all files or directories in a given \emph{path}. You should let a user to specify regex for the file or directories names.
+
+\bigskip
+How would you test the {\small CLI} app? 
 
 \bigskip
 
-How would you test the CLI app? 
-
-\bigskip
-
-The most popular Golang library for CLI application is \href{https://github.com/spf13/cobra}{github.com/spf13/cobra}.
+The most popular Golang library for {\small CLI} application is \href{https://github.com/spf13/cobra}{github.com/spf13/cobra}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 \section{References}

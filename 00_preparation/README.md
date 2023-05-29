@@ -5,7 +5,7 @@
 Expected background knowledge and skills for the workshop:
 
 - Have 1-year hands-on experience in other programming language;
-- Know how to work with the Command Line Interface in Linux or OSX;
+- Know how to work with the Command Line Interface/Terminal on Linux or OSX (`mkdir`, `ls`, `cd`, installing packages);
 - basic knowledge about Git.
 
 Recommended: you should have an Github or Gitlab account.
@@ -19,15 +19,17 @@ Recommended: you should have an Github or Gitlab account.
   - Git;
   - Docker.
 
-- An IDE or code editor to work with Golang, e.g.:
+- An IDE or code editor to work with Golang:
    
   - vscode,
-  - Jetbrains Goland.
+  - Jetbrains Goland (optionally).
 
 - for the exercises with SQL and no{\small SQL} databases:
 
   - Postgres CLI,
   - MongoDB CLI.
+
+- if the training/workshop is remote, please install MS Teams or Zoom on your workstation. The web version of the video conferencing solutions, do not support remote control.
 
 You will find on [github.com/golang/go/wiki/IDEsAndTextEditorPlugins](https://github.com/golang/go/wiki/IDEsAndTextEditorPlugins) information about how to configure your favorite editor to work with Golang.
 
@@ -48,6 +50,8 @@ We recommend Ubuntu, one of the LTSes - [wiki.ubuntu.com/Releases](https://wiki.
    ```bash
    go version
    ```
+
+   Alternative instalation method: [go.dev/doc/install](https://go.dev/doc/install). Do not forget to add `export PATH=$PATH:/usr/local/go/bin` to the end of `~/.bashrc`.
 
 2. Install vscode ([code.visualstudio.com/](https://code.visualstudio.com)) or Goland ([jetbrains.com/go/](https://www.jetbrains.com/go/)):
 
@@ -102,6 +106,19 @@ We recommend Ubuntu, one of the LTSes - [wiki.ubuntu.com/Releases](https://wiki.
 ## MacOS
 
 1. Install *Homebrew*, a package manager for MacOS, follow the instructions from the official website - [brew.sh](https://brew.sh/).
+
+   Do not forget to add to your `.zshrc`:
+
+   ```zsh
+
+   # you will find the correct command
+   # in the output of the installation script
+   echo 'export PATH="/usr/local/bin:$PATH"' >> "~/.zshrc"
+
+   # alternative: open ~/.zshrc and paste at the end of the file:
+   # export PATH="/usr/local/bin:$PATH"
+   open ~/.zshrc
+   ```
 
 2. With *Homebrew*, you can easily install Golang:
 
