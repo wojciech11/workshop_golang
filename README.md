@@ -4,20 +4,20 @@
 
 1. Module 1 - [basics 1/2](01_basics/basics.pdf):
 
-  - packages
-  - go mod, go get, go build, go install
-  - fmt, imports, linter
-  - vars, consts
-  - functions
-  - data types
-  - for, if, switch
-  - pointers
-  - structs
-  - interfaces
-  - arrays and slices
-  - maps
-  - methods
-  - first basic web app with chi
+   - packages
+   - go mod, go get, go build, go install
+   - fmt, imports, linter
+   - vars, consts
+   - functions
+   - data types
+   - for, if, switch
+   - pointers
+   - structs
+   - interfaces
+   - arrays and slices
+   - maps
+   - methods
+   - first basic web app with chi
 
 2. Module 2 - [basics 2/2](02_basics/basics_2.pdf):
  
@@ -31,12 +31,12 @@
 
 3. Module 3 - building apps and goroutines:
 
-    - CLI app with cobra
-    - Working with JSON
-    - marshall/unmarshall (sed/deser)
-    - db access
-    - goroutines
-    - channels
+   - CLI app with cobra
+   - Working with JSON
+   - marshall/unmarshall (ser/deser)
+   - db access
+   - goroutines
+   - channels
 
 4. Module 4 - observability:
 
