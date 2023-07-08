@@ -64,3 +64,9 @@ logging
 
    - GraphQL API,
    - gRPC.
+
+## References
+
+- [Golang Style guide](google.github.io/styleguide/go/index),
+- [Effective Go](https://go.dev/doc/effective_go),
+- [W jaki sposób wdarażacie nowych do Go? - Golang Poland FB Group](https://www.facebook.com/groups/1278049882223829/permalink/2993731487322318).
